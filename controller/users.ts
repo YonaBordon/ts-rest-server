@@ -65,8 +65,21 @@ export const putUser = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteUser = (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  res.json({ id, msg: 'deletetUsers' });
+  const user = await User.findByPk(id);
+  if (!user) {
+    return res.status(404).json({
+      msg: `No existe usuario con el id ${id}`,
+    });
+  }
+
+  // NOTE: con destroy eliminamos el usuario de la db, no es muy aconsejable en el caso de que el objeto posea informacion que se pueda necesitar
+  // await user.destroy();
+  // por eso actualizamos el estado y podemos no mostrarlo
+
+  await user.update({ state: false });
+
+  res.json(user);
 };
